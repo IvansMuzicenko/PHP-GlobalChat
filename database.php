@@ -15,7 +15,7 @@
 
 	case "sendMessage":
 		session_start();
-		$query = $db->prepare("INSERT INTO messages SET user=?, messageText=?");
+		$query = $db->prepare("INSERT INTO messages SET user=?, message=?");
 		$run = $query->execute([$_SESSION['user'], $_REQUEST['message']]);
 
 		if( $run ){
@@ -35,8 +35,8 @@
 		$chat = '';
 		foreach( $response as $message ) {
 			$chat .= '<div class="single-message '.(($_SESSION['user']==$message->user)?'right':'left').'">
-						<strong>'.$message->user.': </strong><br /> <p>'.$message->messageText.'</p>
-						<span>'.date('h:i a', strtotime($message->date)).'</span>
+						<strong>'.$message->user.': </strong><br /> <p>'.$message->message.'</p>
+						<span>'.date('H:i', strtotime($message->date)).'</span>
 						</div>
 						<div class="clear"></div>
 						';

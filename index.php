@@ -4,15 +4,11 @@
 	<meta charset="UTF-8">
 	<title>Global chat</title>
 	<link rel="stylesheet" href="style.css" type="text/css" />
-    <script
-        src="https://code.jquery.com/jquery-3.3.1.js"
-        integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60="
-        crossorigin="anonymous"></script>
 </head>
 <body>
 	
 	<div id="wrapper">
-	    <h1>Welcome <?php session_start(); echo $_SESSION['user']; ?> to global chat app!</h1>  	
+	    <h1>Welcome <?php session_start(); echo $_SESSION['user']; ?> to global chat app!</h1> 
 		<div class="chat_wrapper">
 			<form action="" id="nameChange">
 				<span><?php echo $_SESSION['user'] . ":"; ?></span>
@@ -23,9 +19,9 @@
 			<div id="abc"></div>
 			<div id="chat"></div>
 
-			<form method="POST" id="messageForm">
+			<form method="" id="messageForm">
 				<textarea name="message" cols="30" rows="7" id="textarea" class="textarea" placeholder="Type a message to send"></textarea>
-                <button class="submit" type="submit">Submit</button>
+                <button class="submit" id="formSubmit" type="submit">Submit</button>
 			</form>
 
 		</div>
@@ -34,8 +30,12 @@
 	</div>
 	
 	<script>
-		LoadChat();
+		let textarea = document.getElementById("textarea");
+		let chat = document.getElementById("chat");
+		let form = document.getElementById("messageForm");
+		let nameChange = document.getElementById("nameChange");
 
+		LoadChat();
 		setInterval(function(){
 			LoadChat();
 		}, 1000);
@@ -56,37 +56,41 @@
 		}
 
 		function LoadChat(){
-			$.post('database.php?action=getMessages', function(response){
-				let scrollpos = $('#chat').scrollTop();
+			fetch("database.php?action=getMessages").then(async (response) => {
+				const text = await response.text();
+				let scrollpos = chat.scrollTop;
 				scrollpos = parseInt(scrollpos) + 520;
-				let scrollHeight = $('#chat').prop('scrollHeight');
+				let scrollHeight = chat.scrollHeight;
 
-				$('#chat').html(response);
+				chat.innerHTML = text;
 
 				if( scrollpos >= scrollHeight ){
-					$('#chat').scrollTop( $('#chat').prop('scrollHeight') );
+					chat.scrollTop = chat.scrollHeight;
 				}
-			});
+			} )
 		}
+
 		
-		$('#textarea').keyup(function(e){
-			if( e.which == 13 ){
-				$('form').submit();
+		form.onkeyup = function(event){
+			if( event.key == "Enter" ){
+				document.getElementById("formSubmit").click()
 			}
-		});
+		};
 
 
-		$('form').submit(function(){
-			let message = $('#textarea').val();
-
-			$.post('database.php?action=sendMessage&message='+message, function(response){
-				if( response == 1 ){
-					LoadChat();
-					document.getElementById('messageForm').reset();
-				}
-			});
+		form.onsubmit = function(event){
+			let message = textarea.value.trim();
+			if (message.length > 0) {
+				fetch("database.php?action=sendMessage&message="+message).then(async (response) => {
+					if( await response.ok){
+						LoadChat();
+						form.reset();
+					}
+				});
+				
+			}
 			return false;
-		});
+		};
 	</script>
 </body>
 </html> 
