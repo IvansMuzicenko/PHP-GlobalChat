@@ -14,6 +14,11 @@
 	<div id="wrapper">
 	    <h1>Welcome <?php session_start(); echo $_SESSION['user']; ?> to global chat app!</h1>  	
 		<div class="chat_wrapper">
+			<form action="" id="nameChange">
+				<span><?php echo $_SESSION['user'] . ":"; ?></span>
+				<input type="text" id="nameInput" placeholder="Change name">
+				<button type="submit">Change</button>
+			</form> 	
 			
 			<div id="abc"></div>
 			<div id="chat"></div>
@@ -34,6 +39,21 @@
 		setInterval(function(){
 			LoadChat();
 		}, 1000);
+
+		nameChange.onsubmit = function() {
+			let newName = document.getElementById("nameInput").value.trim();
+			if (newName.length > 0) {
+				fetch("setUser.php?action=changeName&name="+newName).then(async (response) => {
+					if( await response.ok){
+						LoadChat();
+						nameChange.reset();
+						location.reload()
+					}
+				});
+			}
+			return false;
+
+		}
 
 		function LoadChat(){
 			$.post('database.php?action=getMessages', function(response){
